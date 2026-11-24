@@ -1,0 +1,40 @@
+# yaml-language-server: $schema=https://promptfoo.dev/config-schema.json
+
+# Learn more about building a configuration: https://promptfoo.dev/docs/configuration/guide
+
+description: "n8n LLM app evaluation"
+
+prompts:
+  - "{{input}}"
+  
+
+providers:
+  - id: "https"
+    config:
+      url: "https://crispy-disco-wj5j4q5wjq939g6v-5678.app.github.dev/webhook/78db425b-a8e2-4608-ab01-c41beafb1a3f"
+      method: "POST"
+      headers:
+        Content-Type: "application/json"
+      body:
+        input: "{{input}}"
+      transformResponse: |
+        (json) => {
+          // normalize to one string for assertions
+          return json.final_answer ?? json.output ?? JSON.stringify(json);
+        }
+  
+
+tests:
+  - description: "Basic correctness"
+    vars:
+      input: "What is 2 plus 3? Return only the number."
+    assert:
+      - type: "equals"
+        value: "5"
+
+  - description: "General Query"
+    vars:
+      input: "Where is Taj Mahal?"
+    assert:
+      - type: "icontains"
+        value: "Agra"
